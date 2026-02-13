@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JobSpark — Find Your Next Role</title>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161a24;
+      --surface2: #1e2333;
+      --border: rgba(255,255,255,0.07);
+      --accent: #5c6ef8;
+      --green: #22c55e;
+      --text: #e8eaf0;
+      --muted: #8b92aa;
+      --card-hover: rgba(92, 110, 248, 0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(13,15,20,0.85); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, #5c6ef8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+    .logo span { font-weight: 300; }
+    .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+    .nav-btn { background: none; border: none; color: var(--muted); padding: 0.45rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .nav-btn:hover, .nav-btn.active { color: var(--text); background: var(--surface2); }
+    .btn-post { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+    .btn-post:hover { background: #4a5ce0; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero { padding: 5rem 2rem 3.5rem; text-align: center; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(92,110,248,0.12) 0%, transparent 70%); }
+    .hero-badge { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(92,110,248,0.12); border: 1px solid rgba(92,110,248,0.25); color: #a5b4fc; font-size: 0.8rem; font-weight: 600; padding: 0.3rem 0.9rem; border-radius: 99px; margin-bottom: 1.5rem; }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 1rem; }
+    .hero h1 em { font-style: normal; background: linear-gradient(135deg, #5c6ef8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--muted); font-size: 1.1rem; max-width: 520px; margin: 0 auto 2.5rem; }
+
+    /* SEARCH */
+    .search-bar { max-width: 760px; margin: 0 auto 1.5rem; display: flex; gap: 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 0.6rem; }
+    .search-bar input { flex: 1; background: none; border: none; color: var(--text); font-size: 1rem; padding: 0.5rem 0.75rem; outline: none; }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-bar select { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; padding: 0.4rem 0.75rem; border-radius: 10px; outline: none; cursor: pointer; }
+    .search-bar button { background: var(--accent); color: #fff; border: none; padding: 0.55rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+    .search-bar button:hover { background: #4a5ce0; }
+
+    .quick-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 0.5rem; }
+    .chip { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 0.35rem 0.9rem; border-radius: 99px; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; user-select: none; }
+    .chip:hover, .chip.active { border-color: var(--accent); color: var(--text); background: rgba(92,110,248,0.1); }
+
+    /* STATS */
+    .stats { display: flex; justify-content: center; gap: 3rem; padding: 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 1.8rem; font-weight: 800; }
+    .stat-lbl { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.5px; }
+
+    /* MAIN LAYOUT */
+    .main { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; padding: 0 1.5rem 4rem; }
+
+    /* FILTERS */
+    .filters-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; height: fit-content; position: sticky; top: 80px; }
+    .filters-panel h3 { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; }
+    .filter-group { margin-bottom: 1.5rem; }
+    .filter-group label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.5rem; font-weight: 600; }
+    .filter-group select, .filter-group input[type=range] { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.55rem 0.75rem; border-radius: 10px; font-size: 0.9rem; outline: none; cursor: pointer; }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+    .filter-checks { display: flex; flex-direction: column; gap: 0.6rem; }
+    .filter-check { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: var(--muted); cursor: pointer; }
+    .filter-check input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+    .filter-check:hover { color: var(--text); }
+    .btn-clear { width: 100%; background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.6rem; border-radius: 10px; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; margin-top: 0.5rem; }
+    .btn-clear:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* JOB LIST */
+    .job-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.75rem; }
+    .results-count { font-size: 0.95rem; color: var(--muted); }
+    .results-count strong { color: var(--text); }
+    .sort-select { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; padding: 0.4rem 0.75rem; border-radius: 8px; outline: none; cursor: pointer; }
+    .job-cards { display: flex; flex-direction: column; gap: 1rem; }
+
+    /* JOB CARD */
+    .job-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.4rem 1.5rem; cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+    .job-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: transparent; transition: background 0.2s; }
+    .job-card:hover { border-color: rgba(92,110,248,0.3); transform: translateY(-2px); background: var(--card-hover); }
+    .job-card:hover::before { background: var(--accent); }
+    .job-card.featured { border-color: rgba(92,110,248,0.25); background: rgba(92,110,248,0.04); }
+    .job-card.featured::before { background: var(--accent); }
+
+    .card-top { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 0.9rem; }
+    .company-logo { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; flex-shrink: 0; }
+    .card-info { flex: 1; min-width: 0; }
+    .card-info h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .company-name { font-size: 0.88rem; color: var(--muted); }
+
+    .card-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.9rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem 0.7rem; border-radius: 99px; font-size: 0.76rem; font-weight: 600; letter-spacing: 0.3px; }
+    .badge-type   { background: rgba(92,110,248,0.15); color: #a5b4fc; }
+    .badge-remote { background: rgba(34,197,94,0.12); color: #4ade80; }
+    .badge-onsite { background: rgba(249,115,22,0.12); color: #fb923c; }
+    .badge-hybrid { background: rgba(168,85,247,0.12); color: #c084fc; }
+    .badge-hot    { background: rgba(239,68,68,0.15); color: #f87171; }
+    .badge-new    { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+    .badge-featured { background: rgba(234,179,8,0.15); color: #fbbf24; }
+
+    .card-meta { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.9rem; }
+    .meta-item { display: flex; align-items: center; gap: 0.3rem; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .tag { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 0.76rem; padding: 0.22rem 0.6rem; border-radius: 6px; }
+    .card-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .salary { font-size: 1rem; font-weight: 700; color: var(--green); }
+    .posted-time { font-size: 0.8rem; color: var(--muted); }
+    .btn-apply { background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; }
+    .btn-apply:hover { background: #4a5ce0; transform: translateY(-1px); }
+    .btn-save { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem; border-radius: 8px; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; display: flex; align-items: center; }
+    .btn-save:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-save.saved { border-color: var(--accent); color: var(--accent); background: rgba(92,110,248,0.1); }
+
+    /* PAGINATION */
+    .pagination { display: flex; justify-content: center; gap: 0.4rem; margin-top: 2rem; flex-wrap: wrap; }
+    .page-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .page-btn:hover, .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; border-radius: 20px 20px 0 0; }
+    .modal-header .company-logo { width: 64px; height: 64px; border-radius: 14px; font-size: 1.6rem; }
+    .modal-header-info h2 { font-size: 1.3rem; font-weight: 800; }
+    .modal-header-info p { color: var(--muted); font-size: 0.9rem; margin-top: 0.2rem; }
+    .modal-close { margin-left: auto; background: var(--surface2); border: none; color: var(--muted); width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; flex-shrink: 0; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 1.5rem; }
+    .modal-section { margin-bottom: 1.8rem; }
+    .modal-section h3 { font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.9rem; }
+    .modal-section p { color: var(--muted); font-size: 0.93rem; line-height: 1.7; }
+    .req-list { list-style: none; }
+    .req-list li { display: flex; align-items: flex-start; gap: 0.6rem; color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .req-list li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+    .benefits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .benefit-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 0.9rem; font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+    .modal-apply-row { display: flex; gap: 0.75rem; padding: 1.5rem; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: var(--surface); border-radius: 0 0 20px 20px; }
+    .btn-apply-full { flex: 1; background: var(--accent); color: #fff; border: none; padding: 0.75rem; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+    .btn-apply-full:hover { background: #4a5ce0; }
+
+    /* POST JOB */
+    .post-modal { max-width: 600px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .form-group label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.65rem 0.9rem; border-radius: 10px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 100px; }
+
+    /* TOAST */
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 0.9rem 1.3rem; border-radius: 12px; font-size: 0.9rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 0.6rem; animation: slideIn 0.3s ease; max-width: 320px; }
+    @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: none; opacity: 1; } }
+    .toast.success { border-color: var(--green); }
+    .toast.info { border-color: var(--accent); }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state h3 { color: var(--text); margin-bottom: 0.5rem; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+    @media (max-width: 900px) { .main { grid-template-columns: 1fr; } .filters-panel { position: static; } }
+    @media (max-width: 600px) { nav { padding: 0 1rem; } .hero { padding: 3rem 1rem 2rem; } .search-bar { flex-direction: column; } .form-row { grid-template-columns: 1fr; } .stats { gap: 2rem; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Job<span>Spark</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="setView('browse')">Browse Jobs</button>
+    <button class="nav-btn" onclick="setView('saved')">🔖 Saved</button>
+    <button class="btn-post" onclick="openPostModal()">+ Post a Job</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">✦ 1,240+ jobs added this week</div>
+  <h1>Find a job you'll<br><em>actually love</em></h1>
+  <p>Thousands of roles at top companies — remote, hybrid, and on-site. Search by skill, location, or salary.</p>
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="Job title, company, or keyword..." />
+    <select id="searchLocation">
+      <option value="">All Locations</option>
+      <option>Remote</option>
+      <option>New York, NY</option>
+      <option>San Francisco, CA</option>
+      <option>London, UK</option>
+      <option>Berlin, Germany</option>
+      <option>Austin, TX</option>
+      <option>Toronto, Canada</option>
+    </select>
+    <button onclick="doSearch()">🔍 Search</button>
+  </div>
+  <div class="quick-filters" id="quickFilters">
+    <span class="chip active" onclick="filterChip(this, '')">All</span>
+    <span class="chip" onclick="filterChip(this, 'Remote')">🌐 Remote</span>
+    <span class="chip" onclick="filterChip(this, 'Engineering')">⚙️ Engineering</span>
+    <span class="chip" onclick="filterChip(this, 'Design')">🎨 Design</span>
+    <span class="chip" onclick="filterChip(this, 'Product')">📦 Product</span>
+    <span class="chip" onclick="filterChip(this, 'Marketing')">📢 Marketing</span>
+    <span class="chip" onclick="filterChip(this, 'Data')">📊 Data</span>
+    <span class="chip" onclick="filterChip(this, 'Finance')">💰 Finance</span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">12,840</div><div class="stat-lbl">OPEN ROLES</div></div>
+  <div class="stat"><div class="stat-num">4,200+</div><div class="stat-lbl">COMPANIES</div></div>
+  <div class="stat"><div class="stat-num">98%</div><div class="stat-lbl">RESPONSE RATE</div></div>
+  <div class="stat"><div class="stat-num">2.4M+</div><div class="stat-lbl">APPLICANTS PLACED</div></div>
+</div>
+
+<div class="main">
+  <aside class="filters-panel">
+    <h3>🎛 Filters</h3>
+    <div class="filter-group">
+      <label>Job Type</label>
+      <select id="filterType" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option>Full-time</option><option>Part-time</option>
+        <option>Contract</option><option>Internship</option><option>Freelance</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Experience Level</label>
+      <select id="filterLevel" onchange="applyFilters()">
+        <option value="">All Levels</option>
+        <option>Entry Level</option><option>Mid Level</option>
+        <option>Senior</option><option>Lead / Staff</option><option>Director+</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Work Mode</label>
+      <div class="filter-checks" id="workModeChecks">
+        <label class="filter-check"><input type="checkbox" value="Remote" onchange="applyFilters()"> Remote</label>
+        <label class="filter-check"><input type="checkbox" value="Hybrid" onchange="applyFilters()"> Hybrid</label>
+        <label class="filter-check"><input type="checkbox" value="On-site" onchange="applyFilters()"> On-site</label>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Min Salary: <strong id="salaryLabel" style="color:var(--text)">$0k</strong></label>
+      <input type="range" id="salaryRange" min="0" max="300" step="10" value="0" oninput="updateSalary(this.value)">
+      <div class="range-labels"><span>$0k</span><span>$300k+</span></div>
+    </div>
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="filterCategory" onchange="applyFilters()">
+        <option value="">All Categories</option>
+        <option>Engineering</option><option>Design</option><option>Product</option>
+        <option>Marketing</option><option>Data</option><option>Finance</option>
+        <option>Operations</option><option>Sales</option>
+      </select>
+    </div>
+    <button class="btn-clear" onclick="clearFilters()">✕ Clear All Filters</button>
+  </aside>
+
+  <div>
+    <div class="job-list-header">
+      <div class="results-count">Showing <strong id="resultCount">0</strong> jobs</div>
+      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+        <option value="relevance">Most Relevant</option>
+        <option value="recent">Most Recent</option>
+        <option value="salary_high">Highest Salary</option>
+        <option value="salary_low">Lowest Salary</option>
+      </select>
+    </div>
+    <div class="job-cards" id="jobCards"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- Job Detail Modal -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Post Job Modal -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal post-modal">
+    <div class="modal-header">
+      <div style="font-size:1.5rem">📋</div>
+      <div class="modal-header-info"><h2>Post a New Job</h2><p>Reach thousands of qualified candidates</p></div>
+      <button class="modal-close" onclick="closePostModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Job Title *</label><input id="pTitle" type="text" placeholder="e.g. Senior Frontend Engineer"></div>
+        <div class="form-group"><label>Company Name *</label><input id="pCompany" type="text" placeholder="e.g. Acme Corp"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label><select id="pCategory"><option>Engineering</option><option>Design</option><option>Product</option><option>Marketing</option><option>Data</option><option>Finance</option><option>Operations</option><option>Sales</option></select></div>
+        <div class="form-group"><label>Job Type</label><select id="pType"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option><option>Freelance</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Work Mode</label><select id="pMode"><option>Remote</option><option>Hybrid</option><option>On-site</option></select></div>
+        <div class="form-group"><label>Location</label><input id="pLocation" type="text" placeholder="e.g. San Francisco, CA"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Salary Min ($k/yr)</label><input id="pSalMin" type="number" placeholder="80"></div>
+        <div class="form-group"><label>Salary Max ($k/yr)</label><input id="pSalMax" type="number" placeholder="120"></div>
+      </div>
+      <div class="form-group"><label>Job Description *</label><textarea id="pDesc" placeholder="Describe the role and responsibilities..."></textarea></div>
+      <div class="form-group"><label>Requirements (one per line)</label><textarea id="pReqs" placeholder="3+ years of React experience&#10;Strong TypeScript skills"></textarea></div>
+      <div class="form-group"><label>Skills / Tags (comma separated)</label><input id="pTags" type="text" placeholder="React, Node.js, TypeScript"></div>
+    </div>
+    <div class="modal-apply-row">
+      <button class="btn-apply-full" onclick="submitJob()">🚀 Post Job</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const JOBS_DATA = [
+  { id:1, title:"Senior Frontend Engineer", company:"Stripe", category:"Engineering", type:"Full-time", mode:"Remote", location:"Remote", level:"Senior", salaryMin:160, salaryMax:210, logo:"💳", logoColor:"#1a1a2e", logoText:"#6366f1", tags:["React","TypeScript","GraphQL","AWS"], featured:true, hot:false, postedDays:1, description:"Join Stripe's financial infrastructure platform team building user-facing products used by millions of developers worldwide. You'll work on complex, high-scale systems and collaborate directly with product, design, and infrastructure teams.", requirements:["5+ years of experience with modern JavaScript/TypeScript","Deep expertise in React and its ecosystem","Experience building performant, accessible web interfaces","Familiarity with GraphQL and REST APIs","Strong communication and collaboration skills"], benefits:["💻 Remote-first","🏥 Top-tier Health","📈 Equity Package","🌴 Unlimited PTO","🎓 Learning Budget","🏋️ Wellness Stipend"] },
+  { id:2, title:"Product Designer — Mobile", company:"Figma", category:"Design", type:"Full-time", mode:"Hybrid", location:"San Francisco, CA", level:"Mid Level", salaryMin:130, salaryMax:170, logo:"🎨", logoColor:"#1a0a2e", logoText:"#c084fc", tags:["Figma","iOS","Android","UX Research","Prototyping"], featured:true, hot:true, postedDays:0, description:"Figma is looking for a passionate Product Designer to shape the future of our mobile experience. You'll lead design for our iOS and Android apps, working across the full product lifecycle from research to pixel-perfect delivery.", requirements:["4+ years of product design experience","Portfolio demonstrating strong mobile design skills","Proficiency in Figma (of course!)","Experience running user research sessions","Ability to work cross-functionally with engineering and PM"], benefits:["🎨 Creative Freedom","🏥 Full Benefits","📈 Competitive Equity","🌍 Hybrid Work","🎓 Conference Budget","🐾 Pet Insurance"] },
+  { id:3, title:"Staff Software Engineer — Backend", company:"Notion", category:"Engineering", type:"Full-time", mode:"Remote", location:"Remote", level:"Lead / Staff", salaryMin:220, salaryMax:280, logo:"📝", logoColor:"#0a0a0a", logoText:"#e8eaf0", tags:["Go","Kubernetes","PostgreSQL","gRPC","Distributed Systems"], featured:false, hot:true, postedDays:2, description:"We're looking for a Staff Engineer to drive the technical direction of Notion's backend platform. You'll tackle some of the hardest scaling challenges in our infrastructure, mentor engineers, and lead cross-team initiatives.", requirements:["8+ years of backend engineering experience","Expert-level Go or similar systems language","Proven experience at large-scale distributed systems","Track record of technical leadership across teams","Deep understanding of databases and query optimization"], benefits:["🏠 Remote First","🏥 Comprehensive Health","💰 Top-of-market Salary","📈 Generous Equity","🍽 Daily Meals (SF)","🌴 Flexible PTO"] },
+  { id:4, title:"Data Scientist — ML Platform", company:"Airbnb", category:"Data", type:"Full-time", mode:"Hybrid", location:"San Francisco, CA", level:"Senior", salaryMin:175, salaryMax:230, logo:"🏠", logoColor:"#1a0808", logoText:"#fb7185", tags:["Python","PyTorch","Spark","SQL","A/B Testing"], featured:false, hot:false, postedDays:3, description:"Join Airbnb's ML Platform team to build the intelligence layer that powers host recommendations, pricing algorithms, and guest matching systems.", requirements:["5+ years of industry data science experience","Proficiency in Python and ML frameworks (PyTorch or TensorFlow)","Strong statistics and experimental design background","Experience with large-scale data pipelines","Track record of deploying ML models to production"], benefits:["✈️ Travel Credits","🏥 Health & Dental","📈 RSU Package","🌍 Hybrid Flex","🎓 Education Budget","🧘 Wellness Program"] },
+  { id:5, title:"Growth Marketing Manager", company:"Linear", category:"Marketing", type:"Full-time", mode:"Remote", location:"Remote", level:"Mid Level", salaryMin:110, salaryMax:145, logo:"⚡", logoColor:"#050514", logoText:"#818cf8", tags:["SEO","Content Marketing","Analytics","PLG","Copywriting"], featured:false, hot:false, postedDays:4, description:"Linear is the issue tracker built for high-performance teams. We're looking for a Growth Marketing Manager to own our acquisition channels and help us reach more engineering teams worldwide.", requirements:["3+ years in B2B SaaS growth marketing","Strong SEO and content marketing background","Experience with PLG (product-led growth) motions","Data-driven mindset with strong analytical skills","Excellent writing and communication skills"], benefits:["🌐 Fully Remote","🏥 Health Benefits","📈 Equity","💻 Top Equipment","🌴 Flexible Time Off","📚 Book Budget"] },
+  { id:6, title:"iOS Engineer", company:"Duolingo", category:"Engineering", type:"Full-time", mode:"Hybrid", location:"Pittsburgh, PA", level:"Mid Level", salaryMin:140, salaryMax:185, logo:"🦉", logoColor:"#0a1a0a", logoText:"#4ade80", tags:["Swift","SwiftUI","Combine","XCTest","CI/CD"], featured:false, hot:false, postedDays:5, description:"Help us make language learning fun for 500M+ users! We're hiring an iOS engineer to work on Duolingo's core learning experience — animations, gamification mechanics, and daily habit features.", requirements:["3+ years of iOS development in Swift","Experience with SwiftUI and UIKit","Strong understanding of concurrency (async/await, Combine)","Passion for user-facing product work","Experience with unit and UI testing"], benefits:["🦉 Mission-driven work","🏥 Medical, Dental, Vision","🧠 Learning Budget","🏋️ Gym Membership","🎮 Fun culture","📈 Equity"] },
+  { id:7, title:"Head of Product — Payments", company:"Brex", category:"Product", type:"Full-time", mode:"Remote", location:"Remote", level:"Director+", salaryMin:250, salaryMax:340, logo:"💳", logoColor:"#0a1a1a", logoText:"#22d3ee", tags:["Product Strategy","Fintech","Payments","B2B","Roadmapping"], featured:true, hot:false, postedDays:1, description:"As Head of Product for Payments at Brex, you'll own the product vision for our core financial products used by thousands of high-growth startups.", requirements:["8+ years of product management, 3+ in a senior leadership role","Deep domain expertise in financial products or fintech","Track record of shipping 0→1 and scaling products","Experience managing and growing PM teams","Strong executive presence and stakeholder management skills"], benefits:["💰 Top-of-market Comp","📈 Significant Equity","🏥 Full Benefits","🌐 Remote OK","🌴 Unlimited PTO","🍼 Parental Leave"] },
+  { id:8, title:"Site Reliability Engineer", company:"Cloudflare", category:"Engineering", type:"Full-time", mode:"Remote", location:"Remote", level:"Senior", salaryMin:170, salaryMax:220, logo:"☁️", logoColor:"#0a0d14", logoText:"#fb923c", tags:["Kubernetes","Terraform","Go","Prometheus","Linux"], featured:false, hot:true, postedDays:0, description:"Join the team that keeps Cloudflare's global network — handling over 20% of all internet traffic — running at 99.99% uptime.", requirements:["5+ years of SRE or DevOps experience","Expert-level Kubernetes and container orchestration","Strong proficiency in Go or Python for automation","Experience with large-scale observability systems","Incident management and on-call experience"], benefits:["🌐 Fully Remote","🏥 Top Insurance","📈 RSUs","💻 $1k Home Office","🌴 Flexible PTO","🎓 Learning Stipend"] },
+  { id:9, title:"UX Researcher", company:"Figma", category:"Design", type:"Full-time", mode:"Hybrid", location:"San Francisco, CA", level:"Mid Level", salaryMin:120, salaryMax:160, logo:"🔬", logoColor:"#100a2e", logoText:"#a78bfa", tags:["User Interviews","Usability Testing","Survey Design","Figma","Mixed Methods"], featured:false, hot:false, postedDays:6, description:"Help shape Figma's product direction through high-quality user research. You'll design and execute research studies across the full lifecycle and partner directly with product and design teams.", requirements:["3+ years of UX research experience","Expertise in both qualitative and quantitative methods","Strong ability to synthesize and present complex research","Experience collaborating with product teams in agile environments","Tools: Figma, Maze, UserTesting, or similar"], benefits:["🎨 Creative Culture","🏥 Full Benefits","📈 Equity","🌍 Hybrid","🎓 Conference Travel","🐾 Pet Insurance"] },
+  { id:10, title:"Finance Manager — FP&A", company:"Vercel", category:"Finance", type:"Full-time", mode:"Remote", location:"Remote", level:"Senior", salaryMin:140, salaryMax:185, logo:"▲", logoColor:"#050505", logoText:"#e8eaf0", tags:["FP&A","Excel","SQL","SaaS Metrics","Financial Modeling"], featured:false, hot:false, postedDays:7, description:"Vercel is looking for a Finance Manager to own our financial planning and analysis function. You'll build the models and reporting systems that inform strategic decisions as we scale our developer platform globally.", requirements:["5+ years in FP&A, ideally at a high-growth SaaS company","Advanced Excel and financial modeling skills","SQL proficiency for data analysis","Deep understanding of SaaS metrics (ARR, NRR, CAC, LTV)","Strong communication skills for executive presentations"], benefits:["🌐 Remote First","🏥 Excellent Benefits","📈 Equity","💻 Equipment Budget","🌴 Unlimited PTO","🎓 Learning Budget"] },
+  { id:11, title:"Backend Engineer — Rust", company:"Discord", category:"Engineering", type:"Full-time", mode:"Remote", location:"Remote", level:"Senior", salaryMin:180, salaryMax:240, logo:"🎮", logoColor:"#0a0a1a", logoText:"#818cf8", tags:["Rust","Tokio","PostgreSQL","Redis","Distributed Systems"], featured:false, hot:true, postedDays:2, description:"Discord serves 500M+ registered users. We're hiring Rust engineers to rewrite performance-critical backend services and push the limits of what's possible at scale.", requirements:["4+ years of backend engineering experience","Production Rust experience strongly preferred","Deep knowledge of systems programming and concurrency","Experience with high-throughput, low-latency systems","Familiarity with async Rust (Tokio)"], benefits:["🎮 Games Stipend","🏥 Full Coverage","📈 Equity","🌐 Remote","🌴 Flexible PTO","🍼 Parental Leave"] },
+  { id:12, title:"Marketing Operations Lead", company:"HubSpot", category:"Marketing", type:"Full-time", mode:"Hybrid", location:"Boston, MA", level:"Lead / Staff", salaryMin:120, salaryMax:155, logo:"🚀", logoColor:"#0a1a0a", logoText:"#f97316", tags:["HubSpot","Marketo","SQL","Marketing Automation","Data Analysis"], featured:false, hot:false, postedDays:8, description:"Join HubSpot's marketing operations team to build the systems and processes that power our global demand generation.", requirements:["5+ years of marketing operations experience","Admin-level HubSpot or Marketo experience","SQL proficiency for campaign analysis","Experience managing complex lead routing and scoring","Strong project management skills"], benefits:["🚀 Mission-driven","🏥 Health Benefits","📈 RSUs","🏋️ Wellness","🎓 Tuition Reimbursement","🌴 Flexible PTO"] }
+];
+
+let allJobs = [...JOBS_DATA];
+let filteredJobs = [...JOBS_DATA];
+let savedJobs = new Set();
+let currentPage = 1;
+const PER_PAGE = 7;
+let activeView = 'browse';
+let activeChip = '';
+
+function doSearch() { applyFilters(); }
+
+function filterChip(el, value) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeChip = value;
+  applyFilters();
+}
+
+function updateSalary(val) {
+  document.getElementById('salaryLabel').textContent = val == 0 ? '$0k' : `$${val}k+`;
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const location = document.getElementById('searchLocation').value;
+  const type = document.getElementById('filterType').value;
+  const level = document.getElementById('filterLevel').value;
+  const category = document.getElementById('filterCategory').value;
+  const salaryMin = parseInt(document.getElementById('salaryRange').value);
+  const workModes = [...document.querySelectorAll('#workModeChecks input:checked')].map(c => c.value);
+  const sort = document.getElementById('sortSelect').value;
+  let jobs = [...allJobs];
+  if (q) jobs = jobs.filter(j => j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.tags.some(t => t.toLowerCase().includes(q)) || j.category.toLowerCase().includes(q));
+  if (location === 'Remote') jobs = jobs.filter(j => j.mode === 'Remote');
+  else if (location) jobs = jobs.filter(j => j.location.includes(location));
+  if (type) jobs = jobs.filter(j => j.type === type);
+  if (level) jobs = jobs.filter(j => j.level === level);
+  if (category) jobs = jobs.filter(j => j.category === category);
+  if (activeChip === 'Remote') jobs = jobs.filter(j => j.mode === 'Remote');
+  else if (activeChip) jobs = jobs.filter(j => j.category === activeChip);
+  if (workModes.length) jobs = jobs.filter(j => workModes.includes(j.mode));
+  if (salaryMin > 0) jobs = jobs.filter(j => j.salaryMax >= salaryMin);
+  if (sort === 'recent') jobs.sort((a,b) => a.postedDays - b.postedDays);
+  else if (sort === 'salary_high') jobs.sort((a,b) => b.salaryMax - a.salaryMax);
+  else if (sort === 'salary_low') jobs.sort((a,b) => a.salaryMin - b.salaryMin);
+  else jobs.sort((a,b) => (b.featured?1:0)-(a.featured?1:0) || (b.hot?1:0)-(a.hot?1:0));
+  filteredJobs = jobs; currentPage = 1; renderJobs();
+}
+
+function clearFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchLocation').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterLevel').value = '';
+  document.getElementById('filterCategory').value = '';
+  document.getElementById('salaryRange').value = 0;
+  document.getElementById('salaryLabel').textContent = '$0k';
+  document.querySelectorAll('#workModeChecks input').forEach(c => c.checked = false);
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.chip')[0].classList.add('active');
+  activeChip = '';
+  applyFilters();
+  showToast('🧹 Filters cleared', 'info');
+}
+
+function renderJobs() {
+  const container = document.getElementById('jobCards');
+  document.getElementById('resultCount').textContent = (activeView === 'saved' ? allJobs.filter(j => savedJobs.has(j.id)) : filteredJobs).length;
+  const jobs = activeView === 'saved' ? allJobs.filter(j => savedJobs.has(j.id)) : filteredJobs;
+  const pageJobs = jobs.slice((currentPage-1)*PER_PAGE, currentPage*PER_PAGE);
+  if (!pageJobs.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">${activeView==='saved'?'🔖':'🔍'}</div><h3>${activeView==='saved'?'No saved jobs yet':'No jobs found'}</h3><p>${activeView==='saved'?'Bookmark jobs to revisit them later.':'Try adjusting your filters or search query.'}</p></div>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+  container.innerHTML = pageJobs.map(j => buildCard(j)).join('');
+  renderPagination(jobs.length);
+}
+
+function buildCard(job) {
+  const saved = savedJobs.has(job.id);
+  const modeClass = job.mode==='Remote'?'badge-remote':job.mode==='Hybrid'?'badge-hybrid':'badge-onsite';
+  const posted = job.postedDays===0?'Today':job.postedDays===1?'1 day ago':`${job.postedDays} days ago`;
+  return `<div class="job-card ${job.featured?'featured':''}" onclick="openJobModal(${job.id})">
+    <div class="card-top">
+      <div class="company-logo" style="background:${job.logoColor};color:${job.logoText}">${job.logo}</div>
+      <div class="card-info"><h2>${job.title}</h2><div class="company-name">${job.company} · ${job.location}</div></div>
+    </div>
+    <div class="card-badges">
+      <span class="badge badge-type">${job.type}</span>
+      <span class="badge ${modeClass}">${job.mode}</span>
+      ${job.hot?'<span class="badge badge-hot">🔥 Hot</span>':''}
+      ${job.postedDays===0?'<span class="badge badge-new">✨ New</span>':''}
+      ${job.featured?'<span class="badge badge-featured">⭐ Featured</span>':''}
+    </div>
+    <div class="card-meta">
+      <span class="meta-item">📍 ${job.location}</span>
+      <span class="meta-item">🎓 ${job.level}</span>
+      <span class="meta-item">📁 ${job.category}</span>
+    </div>
+    <div class="card-tags">${job.tags.slice(0,5).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    <div class="card-bottom">
+      <span class="salary">$${job.salaryMin}k – $${job.salaryMax}k/yr</span>
+      <span class="posted-time">Posted ${posted}</span>
+      <div style="display:flex;gap:0.5rem" onclick="event.stopPropagation()">
+        <button class="btn-save ${saved?'saved':''}" onclick="toggleSave(${job.id},this)" title="${saved?'Unsave':'Save'}">${saved?'🔖':'🏷'}</button>
+        <button class="btn-apply" onclick="applyToJob(${job.id})">Apply Now</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPagination(total) {
+  const pages = Math.ceil(total/PER_PAGE);
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML=''; return; }
+  let html = '';
+  if (currentPage>1) html+=`<button class="page-btn" onclick="goPage(${currentPage-1})">←</button>`;
+  for (let i=1;i<=pages;i++) html+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+  if (currentPage<pages) html+=`<button class="page-btn" onclick="goPage(${currentPage+1})">→</button>`;
+  el.innerHTML = html;
+}
+
+function goPage(p) { currentPage=p; renderJobs(); document.querySelector('.main').scrollIntoView({behavior:'smooth'}); }
+
+function openJobModal(id) {
+  const job = allJobs.find(j=>j.id===id);
+  if (!job) return;
+  const modeClass = job.mode==='Remote'?'badge-remote':job.mode==='Hybrid'?'badge-hybrid':'badge-onsite';
+  const saved = savedJobs.has(job.id);
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="company-logo" style="background:${job.logoColor};color:${job.logoText};width:64px;height:64px;border-radius:14px;font-size:1.6rem">${job.logo}</div>
+      <div class="modal-header-info"><h2>${job.title}</h2><p>${job.company} · ${job.location} · <span style="color:#22c55e;font-weight:700">$${job.salaryMin}k–$${job.salaryMax}k/yr</span></p></div>
+      <button class="modal-close" onclick="closeJobModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="card-badges" style="margin-bottom:1.5rem">
+        <span class="badge badge-type">${job.type}</span>
+        <span class="badge ${modeClass}">${job.mode}</span>
+        <span class="badge badge-type">${job.level}</span>
+        <span class="badge badge-type">${job.category}</span>
+        ${job.hot?'<span class="badge badge-hot">🔥 Hot</span>':''}
+        ${job.featured?'<span class="badge badge-featured">⭐ Featured</span>':''}
+      </div>
+      <div class="modal-section"><h3>About the Role</h3><p>${job.description}</p></div>
+      <div class="modal-section"><h3>Requirements</h3><ul class="req-list">${job.requirements.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+      <div class="modal-section"><h3>Skills</h3><div class="card-tags">${job.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div>
+      <div class="modal-section"><h3>Benefits & Perks</h3><div class="benefits-grid">${job.benefits.map(b=>`<div class="benefit-item">${b}</div>`).join('')}</div></div>
+    </div>
+    <div class="modal-apply-row">
+      <button class="btn-save ${saved?'saved':''}" style="min-width:90px;justify-content:center" onclick="toggleSave(${job.id},this)">${saved?'🔖 Saved':'🏷 Save'}</button>
+      <button class="btn-apply-full" onclick="applyToJob(${job.id});closeJobModal()">🚀 Apply Now</button>
+    </div>`;
+  document.getElementById('jobModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeJobModal() { document.getElementById('jobModal').classList.remove('open'); document.body.style.overflow=''; }
+function openPostModal() { document.getElementById('postModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closePostModal() { document.getElementById('postModal').classList.remove('open'); document.body.style.overflow=''; }
+
+function submitJob() {
+  const title=document.getElementById('pTitle').value.trim();
+  const company=document.getElementById('pCompany').value.trim();
+  const desc=document.getElementById('pDesc').value.trim();
+  if (!title||!company||!desc) { showToast('⚠️ Please fill in all required fields','info'); return; }
+  const logos=['💼','🏢','🔧','🌟','💡','🛠','🎯'];
+  const colors=['#0a0f1a','#1a0a0a','#0a1a0a','#0a0a1a'];
+  const txts=['#818cf8','#fb7185','#4ade80','#fbbf24','#22d3ee'];
+  const newJob={
+    id:Date.now(), title, company,
+    category:document.getElementById('pCategory').value,
+    type:document.getElementById('pType').value,
+    mode:document.getElementById('pMode').value,
+    location:document.getElementById('pLocation').value||'Remote',
+    level:'Mid Level',
+    salaryMin:parseInt(document.getElementById('pSalMin').value)||80,
+    salaryMax:parseInt(document.getElementById('pSalMax').value)||120,
+    logo:logos[Math.floor(Math.random()*logos.length)],
+    logoColor:colors[Math.floor(Math.random()*colors.length)],
+    logoText:txts[Math.floor(Math.random()*txts.length)],
+    tags:document.getElementById('pTags').value.split(',').map(t=>t.trim()).filter(Boolean)||['Opportunity'],
+    featured:false, hot:false, postedDays:0,
+    description:desc,
+    requirements:document.getElementById('pReqs').value.split('\n').map(r=>r.trim()).filter(Boolean)||['Requirements to be updated'],
+    benefits:['🏥 Health Insurance','💻 Remote Work','📈 Growth Opportunities','🌴 Paid Time Off']
+  };
+  allJobs.unshift(newJob);
+  applyFilters();
+  closePostModal();
+  showToast(`✅ "${title}" posted successfully!`,'success');
+  ['pTitle','pCompany','pDesc','pReqs','pTags','pSalMin','pSalMax','pLocation'].forEach(id=>document.getElementById(id).value='');
+}
+
+function toggleSave(id, btn) {
+  if (savedJobs.has(id)) {
+    savedJobs.delete(id);
+    btn.classList.remove('saved');
+    btn.innerHTML = btn.style.minWidth?'🏷 Save':'🏷';
+    showToast('🏷 Job removed from saved','info');
+  } else {
+    savedJobs.add(id);
+    btn.classList.add('saved');
+    btn.innerHTML = btn.style.minWidth?'🔖 Saved':'🔖';
+    showToast('🔖 Job saved!','success');
+  }
+  if (activeView==='saved') renderJobs();
+}
+
+function applyToJob(id) { const j=allJobs.find(x=>x.id===id); showToast(`🚀 Applied to "${j?.title}" at ${j?.company}!`,'success'); }
+
+function setView(view) {
+  activeView=view; currentPage=1;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.nav-btn[onclick="setView('${view}')"]`).classList.add('active');
+  renderJobs();
+}
+
+function showToast(msg, type='info') {
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${type==='success'?'✅':'ℹ️'}</span> ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+document.getElementById('jobModal').addEventListener('click',function(e){if(e.target===this)closeJobModal();});
+document.getElementById('postModal').addEventListener('click',function(e){if(e.target===this)closePostModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeJobModal();closePostModal();}});
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+// Init
+applyFilters();
+</script>
+</body>
+</html>
